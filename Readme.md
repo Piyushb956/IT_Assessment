@@ -5,6 +5,25 @@ assigns tasks to a Virtual HR user, the Virtual HR updates task status and
 schedules interviews, and the Employer sees status changes live without
 refreshing.
 
+## Live demo
+
+- **App**: [https://your-app-name.vercel.app](https://your-app-name.vercel.app)
+- **API docs**: [https://your-backend-name.onrender.com/docs](https://your-backend-name.onrender.com/docs)
+
+> The backend is on a free tier and may take 30-60 seconds to wake up on
+> first load. If the app doesn't respond right away, use the "Trouble
+> logging in? Click here" link on the login page, wait a moment, then try
+> again.
+
+## Platforms used
+
+| Layer | Platform |
+|---|---|
+| Frontend hosting | Vercel |
+| Backend hosting | Render |
+| Database | FreeSQLDatabase |
+| Repository | GitHub |
+
 ## Tech stack
 
 - **Backend**: FastAPI (async), SQLAlchemy (async), MySQL
@@ -160,12 +179,15 @@ route can be tricked by editing a URL or request payload.
 
 ## Deployment
 
-- **Backend** → Render (or Railway): point it at `backend/`, set
-  `DATABASE_URL` and `SECRET_KEY` as environment variables in the dashboard
-  (never commit `.env`), start command:
-  `uvicorn main:app --host 0.0.0.0 --port $PORT`
-- **Frontend** → Vercel: point it at `frontend/`, set `NEXT_PUBLIC_API_URL`
-  to the live backend URL.
-- **Database** → needs a hosted MySQL instance reachable from Render
-  (Render's free tier doesn't include MySQL — Railway, Aiven, or
-  PlanetScale all offer a free MySQL-compatible tier).
+- **Backend** → deployed on Render. Root directory `backend`, build command
+  `pip install -r requirements.txt`, start command
+  `uvicorn main:app --host 0.0.0.0 --port $PORT`. `DATABASE_URL` and
+  `SECRET_KEY` are set as environment variables in Render's dashboard
+  (never committed as `.env`).
+- **Frontend** → deployed on Vercel. Root directory `frontend`,
+  `NEXT_PUBLIC_API_URL` set as an environment variable pointing at the live
+  Render backend URL.
+- **Database** → hosted on FreeSQLDatabase (free MySQL, 30-day trial per
+  database). If this project is evaluated after that window, a fresh
+  database can be created there and the connection details updated in
+  Render's environment variables.
