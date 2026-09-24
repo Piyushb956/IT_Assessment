@@ -7,13 +7,26 @@ refreshing.
 
 ## Live demo
 
-- **App**: [https://your-app-name.vercel.app](https://your-app-name.vercel.app)
-- **API docs**: [https://your-backend-name.onrender.com/docs](https://your-backend-name.onrender.com/docs)
+- **App**: [https://your-app-name.vercel.app](https://it-hr-mauve.vercel.app/)
+- **API docs**: [https://your-backend-name.onrender.com/docs](https://it-hr.onrender.com)
 
 > The backend is on a free tier and may take 30-60 seconds to wake up on
 > first load. If the app doesn't respond right away, use the "Trouble
 > logging in? Click here" link on the login page, wait a moment, then try
 > again.
+
+
+## Demo credentials
+
+> Bootstrap the admin account via SQL as above, then create these two
+> through the `/admin` panel:
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@company.com | set during bootstrap |
+| Employer | priya@company.com | priya@123 | set via admin panel |
+| Virtual HR | bob.hr@company.com | bob@123 | set via admin panel |
+
 
 ## Platforms used
 
@@ -23,6 +36,7 @@ refreshing.
 | Backend hosting | Render |
 | Database | FreeSQLDatabase |
 | Repository | GitHub |
+
 
 ## Tech stack
 
@@ -131,16 +145,7 @@ IT_Assessment/
    ```
    Visit `http://localhost:3000` — it redirects to `/login`.
 
-## Demo credentials
 
-> Bootstrap the admin account via SQL as above, then create these two
-> through the `/admin` panel:
-
-| Role | Email | Password |
-|---|---|---|
-| Admin | admin@company.com | set during bootstrap |
-| Employer | rahul@company.com | set via admin panel |
-| Virtual HR | priya@company.com | set via admin panel |
 
 ## API overview
 
@@ -162,7 +167,7 @@ route can be tricked by editing a URL or request payload.
 
 ## Known limitations
 
-- **Token expiry is 10 minutes.** Sessions are short by design for this
+- **Token expiry is 60 minutes.** Sessions are short by design for this
   demo; expect to log back in if you pause for more than 10 minutes between
   actions. Adjust `ACCESS_TOKEN_EXPIRE_MINUTES` in `backend/auth.py` if a
   longer demo session is preferred.
