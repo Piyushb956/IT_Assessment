@@ -17,14 +17,12 @@ refreshing.
 
 
 ## Demo credentials
-
-> Bootstrap the admin account via SQL as above, then create these two
 > Note: Employer and Virtual HR credentials below are demo accounts meant
 > for testing. The Admin password is intentionally not included here, since
 > that account can create and manage all other users — it will be shared
 > separately with the evaluator if needed.
-> through the `/admin` panel:
-
+>> Bootstrap the admin account via SQL as above, then create these two
+>>  through the `/admin` panel:
 | Role | Email | Password |
 |---|---|---|
 | Admin | admin@company.com | set during bootstrap |
