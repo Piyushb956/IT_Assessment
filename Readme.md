@@ -1,0 +1,171 @@
+# Salarite Virtual HR Dashboard
+
+A mini ATS/HR dashboard built for the Salarite intern assignment. An Employer
+assigns tasks to a Virtual HR user, the Virtual HR updates task status and
+schedules interviews, and the Employer sees status changes live without
+refreshing.
+
+## Tech stack
+
+- **Backend**: FastAPI (async), SQLAlchemy (async), MySQL
+- **Auth**: JWT tokens (10-minute expiry), bcrypt-hashed passwords,
+  role-based route guards enforced on every endpoint
+- **Frontend**: Next.js (App Router), Tailwind CSS v4
+- **Real-time updates**: polling every 4 seconds (see "Known limitations")
+
+## Features
+
+- Role-based login: Employer, Virtual HR, and Admin, each with their own
+  dashboard — visiting the wrong dashboard's URL redirects you to your own
+- Employer: assign tasks to a Virtual HR user, see live task status and a
+  visual breakdown (pending / in progress / completed)
+- Virtual HR: update task status via an inline control, schedule interviews
+  with a candidate name, time, and mode (voice/video/chat placeholder)
+- Both dashboards show scheduled interviews relevant to them
+- Admin panel: create new users and assign roles without touching SQL
+
+## Project structure
+
+```
+IT_Assessment/
+├── backend/
+│   ├── main.py           API routes
+│   ├── model.py          SQLAlchemy models
+│   ├── schema.py         Pydantic request/response schemas
+│   ├── database.py       Async DB connection setup
+│   ├── auth.py           Password hashing, JWT tokens, role guards
+│   ├── hash_password.py  One-off script to hash a password for seeding
+│   ├── requirements.txt
+│   └── .env              (not committed — see setup below)
+└── frontend/
+    ├── app/
+    │   ├── login/         Login page
+    │   ├── employer/      Employer dashboard
+    │   ├── virtual-hr/    Virtual HR dashboard
+    │   └── admin/         Admin panel (create/list users)
+    ├── components/        Shared UI: header, stats, task list, interview
+    │                      list, modal
+    ├── lib/               API client (attaches auth token) + session helpers
+    └── .env.local         (not committed — see setup below)
+```
+
+## Backend setup
+
+1. Create a virtual environment and install dependencies:
+   ```bash
+   cd backend
+   python -m venv .venv
+   .venv\Scripts\activate      # Windows
+   source .venv/bin/activate   # macOS/Linux
+   pip install -r requirements.txt
+   ```
+
+2. Create the MySQL database and a dedicated app user:
+   ```sql
+   CREATE DATABASE salarite_hr;
+   CREATE USER 'salarite_app'@'localhost' IDENTIFIED BY 'yourpassword';
+   GRANT ALL PRIVILEGES ON salarite_hr.* TO 'salarite_app'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
+
+3. Create `backend/.env`:
+   ```
+   DATABASE_URL=mysql+aiomysql://salarite_app:yourpassword@localhost:3306/salarite_hr
+   SECRET_KEY=replace-with-a-long-random-string
+   ```
+
+4. Start the server (this auto-creates all tables on first run):
+   ```bash
+   uvicorn main:app --reload
+   ```
+   Visit `http://127.0.0.1:8000/docs` to confirm it's running.
+
+5. Bootstrap your first admin user. Passwords are hashed, so generate one first:
+   ```bash
+   python hash_password.py
+   ```
+   Then insert the admin directly (this is the only time you'll need raw SQL
+   for a user):
+   ```sql
+   INSERT INTO users (name, email, password_hash, role, created_at)
+   VALUES ('Admin', 'admin@company.com', 'PASTE_HASH_HERE', 'admin', NOW());
+   ```
+   Log in as admin through the app and create the Employer and Virtual HR
+   demo users from the `/admin` page.
+
+## Frontend setup
+
+1. Install dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. Create `frontend/.env.local`:
+   ```
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   ```
+
+3. Run the dev server:
+   ```bash
+   npm run dev
+   ```
+   Visit `http://localhost:3000` — it redirects to `/login`.
+
+## Demo credentials
+
+> Bootstrap the admin account via SQL as above, then create these two
+> through the `/admin` panel:
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@company.com | set during bootstrap |
+| Employer | rahul@company.com | set via admin panel |
+| Virtual HR | priya@company.com | set via admin panel |
+
+## API overview
+
+| Method | Route | Role required |
+|---|---|---|
+| POST | `/auth/login` | none |
+| GET | `/users/virtual-hr` | employer |
+| POST | `/tasks` | employer |
+| GET | `/tasks` | employer, virtual_hr, admin (self-filtered by token) |
+| PATCH | `/tasks/{id}/status` | virtual_hr (own tasks only) |
+| POST | `/interviews` | virtual_hr |
+| GET | `/interviews` | employer, virtual_hr, admin (self-filtered by token) |
+| POST | `/admin/users` | admin |
+| GET | `/admin/users` | admin |
+
+Every protected route reads the caller's identity and role from their JWT
+token — never from a client-supplied query param or body field — so no
+route can be tricked by editing a URL or request payload.
+
+## Known limitations
+
+- **Token expiry is 10 minutes.** Sessions are short by design for this
+  demo; expect to log back in if you pause for more than 10 minutes between
+  actions. Adjust `ACCESS_TOKEN_EXPIRE_MINUTES` in `backend/auth.py` if a
+  longer demo session is preferred.
+- Real-time updates use polling (every 4s) rather than WebSockets — chosen
+  for reliability within the assignment's time limit; both are acceptable
+  per the assignment brief.
+- Interview scheduling is a placeholder — no real voice/video/chat calling
+  is implemented, matching the assignment's "inbuilt calling placeholder"
+  requirement.
+- CORS is set to `allow_origins=["*"]` for development; restrict this to
+  the deployed frontend's exact URL in production.
+- No refresh-token flow — once a token expires, the user must log in again;
+  sufficient for a demo, not for a production system.
+
+## Deployment
+
+- **Backend** → Render (or Railway): point it at `backend/`, set
+  `DATABASE_URL` and `SECRET_KEY` as environment variables in the dashboard
+  (never commit `.env`), start command:
+  `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **Frontend** → Vercel: point it at `frontend/`, set `NEXT_PUBLIC_API_URL`
+  to the live backend URL.
+- **Database** → needs a hosted MySQL instance reachable from Render
+  (Render's free tier doesn't include MySQL — Railway, Aiven, or
+  PlanetScale all offer a free MySQL-compatible tier).
