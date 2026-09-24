@@ -21,8 +21,10 @@ refreshing.
 > for testing. The Admin password is intentionally not included here, since
 > that account can create and manage all other users — it will be shared
 > separately with the evaluator if needed.
->> Bootstrap the admin account via SQL as above, then create these two
->>  through the `/admin` panel:
+> Bootstrap the admin account via SQL as above, then create these two
+>  through the `/admin` panel:
+
+
 | Role | Email | Password |
 |---|---|---|
 | Admin | admin@company.com | set during bootstrap |
