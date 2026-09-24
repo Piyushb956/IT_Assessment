@@ -27,7 +27,7 @@ refreshing.
 ## Tech stack
 
 - **Backend**: FastAPI (async), SQLAlchemy (async), MySQL
-- **Auth**: JWT tokens (10-minute expiry), bcrypt-hashed passwords,
+- **Auth**: JWT tokens (60-minute expiry), bcrypt-hashed passwords,
   role-based route guards enforced on every endpoint
 - **Frontend**: Next.js (App Router), Tailwind CSS v4
 - **Real-time updates**: polling every 4 seconds (see "Known limitations")
